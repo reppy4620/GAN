@@ -4,7 +4,8 @@ import torchvision.utils as uts
 import sys
 
 from torch import FloatTensor
-from torchvision import transforms
+from torchvision import transforms, datasets
+from torch.utils.data import DataLoader
 from torch.autograd import Variable
 from data_loader import get_loader
 from net.generator import Generator
@@ -18,25 +19,36 @@ class Manager:
         self.d = Discriminator().cuda()
         self.opt_g = optim.Adam(params=self.g.parameters(), lr=2e-4)
         self.opt_d = optim.Adam(params=self.d.parameters(), lr=1e-5)
+        self.batch_size = batch_size
+        self.image_size = image_size
 
         data_transform = transforms.Compose([
             transforms.RandomResizedCrop(image_size),
             transforms.ToTensor()
         ])
-        self.data_loader = get_loader(path, batch_size, data_transform)
+        dataset = datasets.ImageFolder(
+            root=path,
+            transform=data_transform
+        )
+        self.data_loader = DataLoader(
+            dataset,
+            batch_size=batch_size,
+            shuffle=True,
+            num_workers=4
+        )
 
-    def train(self, batch_size, image_size, nc):
-        noise = Variable(FloatTensor(batch_size, 100, 1, 1)).cuda()
-        real = Variable(FloatTensor(batch_size, nc, image_size, image_size))
-        label = Variable(FloatTensor(batch_size)).cuda()
+    def train(self):
+        noise = Variable(FloatTensor(self.batch_size, 100, 1, 1)).cuda()
+        real = Variable(FloatTensor(self.batch_size, 3, self.image_size, self.image_size)).cuda()
+        label = Variable(FloatTensor(self.batch_size)).cuda()
         nepoch = 100
         real_label, fake_label = 1, 0
 
-        def loss_func(outpu, label):
+        def loss_func(output, label):
             return 0.5 * torch.mean((output-label)**2)
 
         for epoch in range(1, nepoch+1):
-            for i, (images) in enumerate(self.data_loader):
+            for i, (images, _) in enumerate(self.data_loader):
 
                 """Gradient of Discriminator"""
                 self.d.zero_grad()
@@ -60,7 +72,7 @@ class Manager:
                 # train
                 output = self.d(fake)
                 errD_f = loss_func(output, label)
-                errD_f.backward()
+                errD_f.backward(retain_graph=True)
 
                 errD = errD_r + errD_f
                 self.opt_d.step()
@@ -76,13 +88,13 @@ class Manager:
                 """Output Log"""
                 sys.stdout.write('\r')
                 sys.stdout.write('| Epoch [%2d/%2d] Iter[%5d/%5d] Loss(D): %.4f Loss(G): %.4f'
-                                 .format(epoch, nepoch, i, len(self.data_loader), errD.data[0], errG.data[0]))
+                                 % (epoch, nepoch, i, len(self.data_loader), errD.data[0], errG.data[0]))
                 sys.stdout.flush()
 
                 """Visualize"""
                 if i % 10 == 0:
-                    dir = 'Result/{0}_{1}.png'.format(epoch, i)
-                    print('Saving result')
+                    dir = 'Result/{0}_{1}.jpg'.format(epoch, i)
+                    print(' | Saving result')
                     uts.save_image(
                         fake.data,
                         dir,
@@ -93,5 +105,8 @@ class Manager:
 
 
 if __name__ == '__main__':
-    path = 'ManyData'
-    lsgan = Manager(path, 128, 100)
+    path = 'data'
+    image_size = 128
+    batch_size = 100
+    lsgan = Manager(path, image_size, batch_size)
+    lsgan.train()

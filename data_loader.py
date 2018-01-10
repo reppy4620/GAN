@@ -12,16 +12,15 @@ class ImageFolder(data.Dataset):
     def __getitem__(self, index):
         image_path = self.image_path[index]
         image = Image.open(image_path).convert('RGB')
-        if self.transform is not None:
-            image = self.transform(image)
+        image = self.transform(image)
         return image
 
 
-def get_loader(image_path, batch_size, transform, num_workers=2):
+def get_loader(image_path, batch_size, transform, num_workers=4):
 
     dataset = ImageFolder(image_path, transform)
     data_loader = data.DataLoader(
-        dataset=dataset,
+        dataset,
         batch_size=batch_size,
         shuffle=True,
         num_workers=num_workers

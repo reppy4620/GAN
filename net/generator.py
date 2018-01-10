@@ -78,24 +78,10 @@ class Generator(nn.Module):
         # output : nfilter * 64 * 64
         self.layer5 = nn.Sequential(
             nn.ConvTranspose2d(
-                in_channels=nfilter * 2,
-                out_channels=nfilter,
-                kernel_size=4,
-                stride=2,
-                padding=1,
-                bias=False
-            ),
-            nn.BatchNorm2d(nfilter),
-            nn.ELU(inplace=True)
-        )
-
-        # input : nfilter * 64 * 64
-        # output : nChannel * 128 * 128
-        self.layer6 = nn.Sequential(
-            nn.ConvTranspose2d(
                 in_channels=nfilter,
                 out_channels=nChannel,
                 kernel_size=4,
+                stride=2,
                 padding=1,
                 bias=False
             ),

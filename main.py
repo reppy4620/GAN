@@ -14,13 +14,14 @@ from net.discriminator import Discriminator
 
 class Manager:
 
-    def __init__(self, path, image_size, batch_size):
-        self.g = Generator().cuda()
-        self.d = Discriminator().cuda()
+    def __init__(self, path, image_size, batch_size, nc):
+        self.g = Generator(nChannel=nc).cuda()
+        self.d = Discriminator(nChannels=nc).cuda()
         self.opt_g = optim.Adam(params=self.g.parameters(), lr=2e-4)
         self.opt_d = optim.Adam(params=self.d.parameters(), lr=1e-5)
         self.batch_size = batch_size
         self.image_size = image_size
+        self.nc = nc
 
         data_transform = transforms.Compose([
             transforms.RandomResizedCrop(image_size),
@@ -39,7 +40,7 @@ class Manager:
 
     def train(self):
         noise = Variable(FloatTensor(self.batch_size, 100, 1, 1)).cuda()
-        real = Variable(FloatTensor(self.batch_size, 3, self.image_size, self.image_size)).cuda()
+        real = Variable(FloatTensor(self.batch_size, self.nc, self.image_size, self.image_size)).cuda()
         label = Variable(FloatTensor(self.batch_size)).cuda()
         nepoch = 100
         real_label, fake_label = 1, 0
@@ -108,5 +109,6 @@ if __name__ == '__main__':
     path = 'data'
     image_size = 128
     batch_size = 100
-    lsgan = Manager(path, image_size, batch_size)
+    nc = 3
+    lsgan = Manager(path, image_size, batch_size, nc)
     lsgan.train()

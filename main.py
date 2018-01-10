@@ -15,13 +15,14 @@ from net.discriminator import Discriminator
 class Manager:
 
     def __init__(self, path, image_size, batch_size, nc):
-        self.g = Generator(nChannel=nc).cuda()
+        self.g = Generator(nChannels=nc).cuda()
         self.d = Discriminator(nChannels=nc).cuda()
         self.opt_g = optim.Adam(params=self.g.parameters(), lr=2e-4)
         self.opt_d = optim.Adam(params=self.d.parameters(), lr=1e-5)
         self.batch_size = batch_size
         self.image_size = image_size
         self.nc = nc
+        print(self.nc)
 
         data_transform = transforms.Compose([
             transforms.RandomResizedCrop(image_size),

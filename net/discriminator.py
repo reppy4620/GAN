@@ -3,7 +3,7 @@ import torch.nn as nn
 
 class Discriminator(nn.Module):
 
-    def __init__(self, nfilter=64, nChannels=3):
+    def __init__(self, nfilter=64, nChannels=4):
 
         """
         :param nfilter: filter size of Convolution layer

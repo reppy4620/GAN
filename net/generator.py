@@ -3,7 +3,7 @@ import torch.nn as nn
 
 class Generator(nn.Module):
 
-    def __init__(self, nz=100, nfilter=64, nChannel=3):
+    def __init__(self, nz=100, nfilter=64, nChannels=4):
 
         """
         :param nz: input dimension default=100
@@ -79,7 +79,7 @@ class Generator(nn.Module):
         self.layer5 = nn.Sequential(
             nn.ConvTranspose2d(
                 in_channels=nfilter,
-                out_channels=nChannel,
+                out_channels=nChannels,
                 kernel_size=4,
                 stride=2,
                 padding=1,

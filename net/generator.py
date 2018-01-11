@@ -19,19 +19,34 @@ class Generator(nn.Module):
         self.layer1 = nn.Sequential(
             nn.ConvTranspose2d(
                 in_channels=nz,
-                out_channels=nfilter*8,
+                out_channels=nfilter*16,
                 kernel_size=4,
                 stride=1,
                 padding=0,
                 bias=False
             ),
-            nn.BatchNorm2d(nfilter*8),
+            nn.BatchNorm2d(nfilter*16),
             nn.ELU(inplace=True)
         )
 
         # input : nfilter*8 * 4 * 4
         # output : nfilter*4 * 8 * 8
         self.layer2 = nn.Sequential(
+            nn.ConvTranspose2d(
+                in_channels=nfilter*16,
+                out_channels=nfilter*8,
+                kernel_size=4,
+                stride=2,
+                padding=1,
+                bias=False
+            ),
+            nn.BatchNorm2d(nfilter*8),
+            nn.ELU(inplace=True)
+        )
+
+        # input : nfilter*4 * 8 * 8
+        # output : nfilter*4 * 16 * 16
+        self.layer3 = nn.Sequential(
             nn.ConvTranspose2d(
                 in_channels=nfilter*8,
                 out_channels=nfilter*4,
@@ -44,26 +59,26 @@ class Generator(nn.Module):
             nn.ELU(inplace=True)
         )
 
-        # input : nfilter*4 * 8 * 8
-        # output : nfilter*4 * 16 * 16
-        self.layer3 = nn.Sequential(
+        # input : nfilter*4 * 16 * 16
+        # output : nfilter*4 * 32 * 32
+        self.layer4 = nn.Sequential(
             nn.ConvTranspose2d(
-                in_channels=nfilter * 4,
-                out_channels=nfilter * 2,
+                in_channels=nfilter*4,
+                out_channels=nfilter*2,
                 kernel_size=4,
                 stride=2,
                 padding=1,
                 bias=False
             ),
-            nn.BatchNorm2d(nfilter * 2),
+            nn.BatchNorm2d(nfilter*2),
             nn.ELU(inplace=True)
         )
 
-        # input : nfilter*4 * 16 * 16
-        # output : nfilter*4 * 32 * 32
-        self.layer4 = nn.Sequential(
+        # input : nfilter * 32 * 32
+        # output : nfilter * 64 * 64
+        self.layer5 = nn.Sequential(
             nn.ConvTranspose2d(
-                in_channels=nfilter * 2,
+                in_channels=nfilter*2,
                 out_channels=nfilter,
                 kernel_size=4,
                 stride=2,
@@ -74,9 +89,9 @@ class Generator(nn.Module):
             nn.ELU(inplace=True)
         )
 
-        # input : nfilter * 32 * 32
-        # output : nfilter * 64 * 64
-        self.layer5 = nn.Sequential(
+        # input : nfilter * 64 * 64
+        # output : nfilter * 128 * 128
+        self.layer6 = nn.Sequential(
             nn.ConvTranspose2d(
                 in_channels=nfilter,
                 out_channels=nChannels,
@@ -94,5 +109,6 @@ class Generator(nn.Module):
         out = self.layer3(out)
         out = self.layer4(out)
         out = self.layer5(out)
+        out = self.layer6(out)
 
         return out

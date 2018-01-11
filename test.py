@@ -1,4 +1,6 @@
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 import torchvision.utils as uts
 import sys
@@ -49,6 +51,7 @@ class Manager:
         label = Variable(FloatTensor(self.batch_size)).cuda()
         nepoch = 1000
         real_label, fake_label = 1, 0
+        bce = nn.BCELoss().cuda()
 
         def loss_func(output, label):
             return 0.5 * torch.mean((output-label)**2)
@@ -64,7 +67,7 @@ class Manager:
 
                 # train Discriminator with real image
                 output = self.d(real)
-                errD_r = loss_func(output, label)
+                errD_r = bce(output, label)
                 errD_r.backward()
 
                 # train Discriminator with fake image
@@ -76,8 +79,8 @@ class Manager:
                 fake = self.g(noise)
 
                 # train
-                output = self.d(fake)
-                errD_f = loss_func(output, label)
+                output = self.d(fake.detach())
+                errD_f = bce(output, label)
                 errD_f.backward(retain_graph=True)
 
                 errD = errD_r + errD_f
@@ -87,7 +90,7 @@ class Manager:
                 self.g.zero_grad()
                 label.data.fill_(real_label)
                 output = self.d(fake)
-                errG = loss_func(output, label)
+                errG = bce(output, label)
                 errG.backward()
                 self.opt_g.step()
 

@@ -57,8 +57,8 @@ class Discriminator(nn.Module):
             nn.ELU(inplace=True)
         )
 
-        # input : nfilter * 8 * 8
-        # output : nfilter * 4 * 4
+        # input : nfilter * 16 * 16
+        # output : nfilter * 8 * 8
         self.layer4 = nn.Sequential(
             nn.Conv2d(
                 in_channels=nfilter*4,
@@ -72,17 +72,33 @@ class Discriminator(nn.Module):
             nn.ELU(inplace=True)
         )
 
-        # input : nfilter * 4 * 4
-        # output : result of judge Real or Fake
+        # input : nfilter * 8 * 8
+        # output : nfilter * 4 * 4
         self.layer5 = nn.Sequential(
             nn.Conv2d(
-                in_channels=nfilter*8,
+                in_channels=nfilter * 8,
+                out_channels=nfilter * 16,
+                kernel_size=4,
+                stride=2,
+                padding=1,
+                bias=False
+            ),
+            nn.BatchNorm2d(nfilter * 16),
+            nn.ELU(inplace=True)
+        )
+
+        # input : nfilter * 4 * 4
+        # output : result of judge Real or Fake
+        self.layer6 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=nfilter*16,
                 out_channels=1,
                 kernel_size=4,
                 stride=1,
                 padding=0,
                 bias=False
-            )
+            ),
+            nn.Sigmoid()
         )
 
     def forward(self, input):
@@ -91,5 +107,6 @@ class Discriminator(nn.Module):
         out = self.layer3(out)
         out = self.layer4(out)
         out = self.layer5(out)
+        out = self.layer6(out)
 
-        return out.view(-1, 1)
+        return out.view(-1, 1).squeeze(1)

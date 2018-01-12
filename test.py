@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
 import torchvision.utils as uts
 import sys
@@ -26,7 +25,7 @@ class Manager:
         self.nc = nc
 
         data_transform = transforms.Compose([
-            transforms.RandomResizedCrop(image_size),
+            transforms.Resize(image_size),
             transforms.ToTensor()
         ])
         dataset = datasets.ImageFolder(
@@ -67,7 +66,7 @@ class Manager:
 
                 # train Discriminator with real image
                 output = self.d(real)
-                errD_r = bce(output, label)
+                errD_r = loss_func(output, label)
                 errD_r.backward()
 
                 # train Discriminator with fake image
@@ -80,7 +79,7 @@ class Manager:
 
                 # train
                 output = self.d(fake.detach())
-                errD_f = bce(output, label)
+                errD_f = loss_func(output, label)
                 errD_f.backward(retain_graph=True)
 
                 errD = errD_r + errD_f
@@ -90,7 +89,7 @@ class Manager:
                 self.g.zero_grad()
                 label.data.fill_(real_label)
                 output = self.d(fake)
-                errG = bce(output, label)
+                errG = loss_func(output, label)
                 errG.backward()
                 self.opt_g.step()
 
@@ -107,6 +106,7 @@ class Manager:
                     uts.save_image(
                         fake.data,
                         dir,
+                        nrow=10,
                         normalize=True
                     )
             torch.save(self.g.state_dict(), 'models/net_g.pth')
@@ -116,7 +116,7 @@ class Manager:
 if __name__ == '__main__':
     path = 'data'
     image_size = 128
-    batch_size = 64
+    batch_size = 100
     nc = 3
     lsgan = Manager(path, image_size, batch_size, nc)
     lsgan.train()

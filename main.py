@@ -3,6 +3,7 @@ import torch.optim as optim
 import torchvision.utils as uts
 import sys
 import os
+import math
 
 from torch import FloatTensor
 from torchvision import transforms, datasets
@@ -18,13 +19,13 @@ class Manager:
         self.g = Generator(nChannels=nc).cuda()
         self.d = Discriminator(nChannels=nc).cuda()
         self.opt_g = optim.Adam(params=self.g.parameters(), lr=2e-4)
-        self.opt_d = optim.Adam(params=self.d.parameters(), lr=1e-5)
+        self.opt_d = optim.Adam(params=self.d.parameters(), lr=1e-4)
         self.batch_size = batch_size
         self.image_size = image_size
         self.nc = nc
 
         data_transform = transforms.Compose([
-            transforms.RandomResizedCrop(image_size),
+            transforms.Resize(image_size),
             transforms.ToTensor()
         ])
         dataset = datasets.ImageFolder(
@@ -99,11 +100,14 @@ class Manager:
 
                 """Visualize"""
                 if i % 10 == 0:
+                    f_noise = Variable(FloatTensor(self.batch_size, 100, 1, 1).normal_(0, 1)).cuda()
+                    f_fake = self.g(f_noise)
                     dir = 'Result/{0}_{1}.jpg'.format(epoch, i)
                     print(' | Saving result')
                     uts.save_image(
-                        fake.data,
-                        dir,
+                        tensor=f_fake.data,
+                        filename=dir,
+                        nrow=int(math.sqrt(self.batch_size)),
                         normalize=True
                     )
             torch.save(self.g.state_dict(), 'models/net_g.pth')
@@ -113,7 +117,7 @@ class Manager:
 if __name__ == '__main__':
     path = 'data'
     image_size = 128
-    batch_size = 64
+    batch_size = 100
     nc = 3
     lsgan = Manager(path, image_size, batch_size, nc)
     lsgan.train()

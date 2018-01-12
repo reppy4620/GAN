@@ -102,6 +102,7 @@ class Discriminator(nn.Module):
         )
 
     def forward(self, input):
+
         out = self.layer1(input)
         out = self.layer2(out)
         out = self.layer3(out)

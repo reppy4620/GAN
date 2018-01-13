@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 import torch.optim as optim
 import torchvision.utils as uts
 import sys
@@ -50,6 +51,7 @@ class Manager:
         label = Variable(FloatTensor(self.batch_size)).cuda()
         nepoch = 1000
         real_label, fake_label = 1, 0
+        bce = nn.BCELoss().cuda()
 
         def loss_func(output, label):
             return 0.5 * torch.mean((output-label)**2)
@@ -77,7 +79,7 @@ class Manager:
                 fake = self.g(noise)
 
                 # train
-                output = self.d(fake)
+                output = self.d(fake.detach())
                 errD_f = loss_func(output, label)
                 errD_f.backward(retain_graph=True)
 

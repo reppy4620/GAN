@@ -24,7 +24,7 @@ class Discriminator(nn.Module):
                 bias=False
             ),
             nn.BatchNorm2d(nfilter),
-            nn.ELU(inplace=True)
+            nn.LeakyReLU(0.2, inplace=True)
         )
 
         # input : nfilter * 64 * 64
@@ -39,7 +39,7 @@ class Discriminator(nn.Module):
                 bias=False
             ),
             nn.BatchNorm2d(nfilter*2),
-            nn.ELU(inplace=True)
+            nn.LeakyReLU(0.2, inplace=True)
         )
 
         # input : nfilter * 32 * 32
@@ -54,7 +54,7 @@ class Discriminator(nn.Module):
                 bias=False
             ),
             nn.BatchNorm2d(nfilter*4),
-            nn.ELU(inplace=True)
+            nn.LeakyReLU(0.2, inplace=True)
         )
 
         # input : nfilter * 16 * 16
@@ -69,7 +69,7 @@ class Discriminator(nn.Module):
                 bias=False
             ),
             nn.BatchNorm2d(nfilter*8),
-            nn.ELU(inplace=True)
+            nn.LeakyReLU(0.2, inplace=True)
         )
 
         # input : nfilter * 8 * 8
@@ -84,7 +84,7 @@ class Discriminator(nn.Module):
                 bias=False
             ),
             nn.BatchNorm2d(nfilter * 16),
-            nn.ELU(inplace=True)
+            nn.LeakyReLU(0.2, inplace=True)
         )
 
         # input : nfilter * 4 * 4

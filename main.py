@@ -1,5 +1,4 @@
 import torch
-import torch.nn as nn
 import torch.optim as optim
 import torchvision.utils as uts
 import sys
@@ -7,11 +6,10 @@ import os
 import math
 
 from torch import FloatTensor
-from torchvision import transforms, datasets
-from torch.utils.data import DataLoader
 from torch.autograd import Variable
 from net.generator import Generator
 from net.discriminator import Discriminator
+from data_loader import get_loader
 
 
 class Manager:
@@ -21,25 +19,10 @@ class Manager:
         self.d = Discriminator(nChannels=nc).cuda()
         self.opt_g = optim.Adam(params=self.g.parameters(), lr=2e-4, betas=(0.1, 0.999))
         self.opt_d = optim.Adam(params=self.d.parameters(), lr=1e-4, betas=(0.5, 0.999))
+        self.data_loader = get_loader(path, image_size, batch_size, num_workers=4)
         self.batch_size = batch_size
         self.image_size = image_size
         self.nc = nc
-
-        data_transform = transforms.Compose([
-            transforms.Resize((image_size, image_size)),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-        ])
-        dataset = datasets.ImageFolder(
-            root=path,
-            transform=data_transform
-        )
-        self.data_loader = DataLoader(
-            dataset,
-            batch_size=batch_size,
-            shuffle=True,
-            num_workers=2
-        )
 
         if not os.path.isdir('models'):
             os.mkdir('models')
@@ -113,6 +96,7 @@ class Manager:
                         nrow=int(math.sqrt(self.batch_size)),
                         normalize=True
                     )
+            # save the model
             torch.save(self.g.state_dict(), 'models/net_g.pth')
             torch.save(self.d.state_dict(), 'models/net_d.pth')
 

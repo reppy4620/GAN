@@ -19,15 +19,16 @@ class Manager:
     def __init__(self, path, image_size, batch_size, nc):
         self.g = Generator(nChannels=nc).cuda()
         self.d = Discriminator(nChannels=nc).cuda()
-        self.opt_g = optim.Adam(params=self.g.parameters(), lr=2e-4)
-        self.opt_d = optim.Adam(params=self.d.parameters(), lr=1e-4)
+        self.opt_g = optim.Adam(params=self.g.parameters(), lr=2e-4, betas=(0.1, 0.999))
+        self.opt_d = optim.Adam(params=self.d.parameters(), lr=1e-4, betas=(0.5, 0.999))
         self.batch_size = batch_size
         self.image_size = image_size
         self.nc = nc
 
         data_transform = transforms.Compose([
-            transforms.Resize(image_size),
-            transforms.ToTensor()
+            transforms.Resize((image_size, image_size)),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
         dataset = datasets.ImageFolder(
             root=path,
@@ -37,7 +38,7 @@ class Manager:
             dataset,
             batch_size=batch_size,
             shuffle=True,
-            num_workers=4
+            num_workers=2
         )
 
         if not os.path.isdir('models'):
@@ -51,16 +52,16 @@ class Manager:
         label = Variable(FloatTensor(self.batch_size)).cuda()
         nepoch = 1000
         real_label, fake_label = 1, 0
-        bce = nn.BCELoss().cuda()
 
         def loss_func(output, label):
             return 0.5 * torch.mean((output-label)**2)
 
         for epoch in range(1, nepoch+1):
-            for i, (images, _) in enumerate(self.data_loader):
+            for i, data in enumerate(self.data_loader):
 
                 """Gradient of Discriminator"""
                 self.d.zero_grad()
+                images, _ = data
 
                 real.data.resize_(images.size()).copy_(images)
                 label.data.resize_(images.size(0)).fill_(real_label)
@@ -97,7 +98,7 @@ class Manager:
                 """Output Log"""
                 sys.stdout.write('\r')
                 sys.stdout.write('| Epoch [%2d/%2d] Iter[%5d/%5d] Loss(D): %.4f Loss(G): %.4f'
-                                 % (epoch, nepoch, i, len(self.data_loader), errD.data[0], errG.data[0]))
+                                 % (epoch, nepoch, i, len(self.data_loader), errD, errG))
                 sys.stdout.flush()
 
                 """Visualize"""

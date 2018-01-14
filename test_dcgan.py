@@ -26,7 +26,7 @@ class Manager:
         self.nc = nc
 
         data_transform = transforms.Compose([
-            transforms.Resize(image_size),
+            transforms.Resize((image_size, image_size)),
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
@@ -38,7 +38,7 @@ class Manager:
             dataset,
             batch_size=batch_size,
             shuffle=True,
-            num_workers=4
+            num_workers=2
         )
 
         if not os.path.isdir('models'):
@@ -53,9 +53,6 @@ class Manager:
         nepoch = 1000
         real_label, fake_label = 1, 0
         bce = nn.BCELoss()
-
-        def loss_func(output, label):
-            return 0.5 * torch.mean((output-label)**2)
 
         for epoch in range(1, nepoch+1):
             for i, data in enumerate(self.data_loader):

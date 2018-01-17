@@ -26,7 +26,7 @@ class Generator(nn.Module):
                 bias=False
             ),
             nn.BatchNorm2d(nfilter*16),
-            nn.ELU(inplace=True)
+            nn.ReLU(inplace=True)
         )
 
         # input : nfilter*8 * 4 * 4
@@ -41,7 +41,7 @@ class Generator(nn.Module):
                 bias=False
             ),
             nn.BatchNorm2d(nfilter*8),
-            nn.ELU(inplace=True)
+            nn.ReLU(inplace=True)
         )
 
         # input : nfilter*4 * 8 * 8
@@ -56,7 +56,7 @@ class Generator(nn.Module):
                 bias=False
             ),
             nn.BatchNorm2d(nfilter*4),
-            nn.ELU(inplace=True)
+            nn.ReLU(inplace=True)
         )
 
         # input : nfilter*4 * 16 * 16
@@ -71,7 +71,7 @@ class Generator(nn.Module):
                 bias=False
             ),
             nn.BatchNorm2d(nfilter*2),
-            nn.ELU(inplace=True)
+            nn.ReLU(inplace=True)
         )
 
         # input : nfilter * 32 * 32
@@ -86,7 +86,7 @@ class Generator(nn.Module):
                 bias=False
             ),
             nn.BatchNorm2d(nfilter),
-            nn.ELU(inplace=True)
+            nn.ReLU(inplace=True)
         )
 
         # input : nfilter * 64 * 64

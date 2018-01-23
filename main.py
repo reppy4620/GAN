@@ -24,10 +24,10 @@ class Manager:
         self.image_size = image_size
         self.nc = nc
 
-        if not os.path.isdir('models'):
-            os.mkdir('models')
-        if not os.path.isdir('Result'):
-            os.mkdir('Result')
+        if not os.path.isdir('models2'):
+            os.mkdir('models2')
+        if not os.path.isdir('Result2'):
+            os.mkdir('Result2')
 
     def train(self):
         noise = Variable(FloatTensor(self.batch_size, 100, 1, 1)).cuda()
@@ -88,7 +88,7 @@ class Manager:
                 if i % 10 == 0:
                     f_noise = Variable(FloatTensor(self.batch_size, 100, 1, 1).normal_(0, 1)).cuda()
                     f_fake = self.g(f_noise)
-                    dir = 'Result/{0}_{1}.jpg'.format(epoch, i)
+                    dir = 'Result2/{0}_{1}.jpg'.format(epoch, i)
                     print(' | Saving result')
                     uts.save_image(
                         tensor=f_fake.data,
@@ -97,12 +97,12 @@ class Manager:
                         normalize=True
                     )
             # save the model
-            torch.save(self.g.state_dict(), 'models/net_g.pth')
-            torch.save(self.d.state_dict(), 'models/net_d.pth')
+            torch.save(self.g, 'models2/net_g.pt')
+            torch.save(self.d, 'models2/net_d.pt')
 
 
 if __name__ == '__main__':
-    path = 'data'
+    path = 'sifted_img'
     image_size = 128
     batch_size = 100
     nc = 3

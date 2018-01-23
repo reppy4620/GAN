@@ -98,7 +98,7 @@ class Discriminator(nn.Module):
                 padding=0,
                 bias=False
             ),
-            nn.Sigmoid()
+            # nn.Sigmoid()
         )
 
     def forward(self, input):

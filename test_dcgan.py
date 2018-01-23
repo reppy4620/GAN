@@ -18,8 +18,8 @@ class Manager:
     def __init__(self, path, image_size, batch_size, nc):
         self.g = Generator(nChannels=nc).cuda()
         self.d = Discriminator(nChannels=nc).cuda()
-        self.opt_g = optim.Adam(params=self.g.parameters(), lr=2e-4, betas=(0.1, 0.999))
-        self.opt_d = optim.Adam(params=self.d.parameters(), lr=1e-4, betas=(0.5, 0.999))
+        self.opt_g = optim.Adam(params=self.g.parameters(), lr=2e-4, betas=(0.5, 0.999))
+        self.opt_d = optim.Adam(params=self.d.parameters(), lr=2e-4, betas=(0.5, 0.999))
         self.data_loader = get_loader(path, image_size, batch_size, num_workers=4)
         self.batch_size = batch_size
         self.image_size = image_size

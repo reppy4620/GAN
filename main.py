@@ -24,10 +24,10 @@ class Manager:
         self.image_size = image_size
         self.nc = nc
 
-        if not os.path.isdir('models2'):
-            os.mkdir('models2')
-        if not os.path.isdir('Result2'):
-            os.mkdir('Result2')
+        if not os.path.isdir('models'):
+            os.mkdir('models')
+        if not os.path.isdir('Result'):
+            os.mkdir('Result')
 
     def train(self):
         noise = Variable(FloatTensor(self.batch_size, 100, 1, 1)).cuda()

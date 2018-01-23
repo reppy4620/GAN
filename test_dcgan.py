@@ -17,7 +17,7 @@ class Manager:
 
     def __init__(self, path, image_size, batch_size, nc):
         self.g = Generator(nChannels=nc).cuda()
-        self.d = Discriminator(nChannels=nc).cuda()
+        self.d = Discriminator(nChannels=nc, isLSGAN=False).cuda()
         self.opt_g = optim.Adam(params=self.g.parameters(), lr=2e-4, betas=(0.5, 0.999))
         self.opt_d = optim.Adam(params=self.d.parameters(), lr=2e-4, betas=(0.5, 0.999))
         self.data_loader = get_loader(path, image_size, batch_size, num_workers=4)
@@ -25,10 +25,10 @@ class Manager:
         self.image_size = image_size
         self.nc = nc
 
-        if not os.path.isdir('models'):
-            os.mkdir('models')
-        if not os.path.isdir('Result'):
-            os.mkdir('Result')
+        if not os.path.isdir('models2'):
+            os.mkdir('models2')
+        if not os.path.isdir('Result2'):
+            os.mkdir('Result2')
 
     def train(self):
         noise = Variable(FloatTensor(self.batch_size, 100, 1, 1)).cuda()
@@ -96,8 +96,8 @@ class Manager:
                         normalize=True
                     )
             # save the model
-            torch.save(self.g.state_dict(), 'models/net_g.pth')
-            torch.save(self.d.state_dict(), 'models/net_d.pth')
+            torch.save(self.g, 'models2/net_g.pt')
+            torch.save(self.d, 'models2/net_d.pt')
 
 
 if __name__ == '__main__':

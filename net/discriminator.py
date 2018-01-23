@@ -1,9 +1,10 @@
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class Discriminator(nn.Module):
 
-    def __init__(self, nfilter=64, nChannels=4):
+    def __init__(self, nfilter=64, nChannels=4, isLSGAN=True):
 
         """
         :param nfilter: filter size of Convolution layer
@@ -11,6 +12,7 @@ class Discriminator(nn.Module):
         """
 
         super(Discriminator, self).__init__()
+        self.isLSGAN = isLSGAN
 
         # input : nChannels * 128 * 128
         # output : nfilter * 64 * 64
@@ -109,5 +111,8 @@ class Discriminator(nn.Module):
         out = self.layer4(out)
         out = self.layer5(out)
         out = self.layer6(out)
+
+        if not self.isLSGAN:
+            out = F.sigmoid(out)
 
         return out.view(-1, 1).squeeze(1)

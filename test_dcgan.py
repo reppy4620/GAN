@@ -10,7 +10,7 @@ from torch import FloatTensor
 from torch.autograd import Variable
 from net.generator import Generator
 from net.discriminator import Discriminator
-from data_loader import get_loader
+from utils import get_loader, winnow
 
 
 class Manager:
@@ -25,10 +25,10 @@ class Manager:
         self.image_size = image_size
         self.nc = nc
 
-        if not os.path.isdir('models2'):
-            os.mkdir('models2')
-        if not os.path.isdir('Result2'):
-            os.mkdir('Result2')
+        if not os.path.isdir('Data_and_Results/DCGAN_model'):
+            os.mkdir('Data_and_Results/DCGAN_model')
+        if not os.path.isdir('Data_and_Results/DCGAN_Result'):
+            os.mkdir('Data_and_Results/DCGAN_Result')
 
     def train(self):
         noise = Variable(FloatTensor(self.batch_size, 100, 1, 1)).cuda()
@@ -87,7 +87,7 @@ class Manager:
                 if i % 10 == 0:
                     f_noise = Variable(FloatTensor(self.batch_size, 100, 1, 1).normal_(0, 1)).cuda()
                     f_fake = self.g(f_noise)
-                    dir = 'Result/{0}_{1}.jpg'.format(epoch, i)
+                    dir = 'Data_and_Results/DCGAN_Result/{0}_{1}.jpg'.format(epoch, i)
                     print(' | Saving result')
                     uts.save_image(
                         tensor=f_fake.data,
@@ -96,8 +96,8 @@ class Manager:
                         normalize=True
                     )
             # save the model
-            torch.save(self.g, 'models2/net_g.pt')
-            torch.save(self.d, 'models2/net_d.pt')
+            torch.save(self.g, 'Data_and_Results/DCGAN_model/net_g.pt')
+            torch.save(self.d, 'Data_and_Results/DCGAN_model/net_d.pt')
 
 
 if __name__ == '__main__':
@@ -105,5 +105,6 @@ if __name__ == '__main__':
     image_size = 128
     batch_size = 100
     nc = 3
+    winnow('data/face', image_size)
     lsgan = Manager(path, image_size, batch_size, nc)
     lsgan.train()

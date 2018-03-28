@@ -9,7 +9,7 @@ from torch import FloatTensor
 from torch.autograd import Variable
 from net.generator import Generator
 from net.discriminator import Discriminator
-from data_loader import get_loader
+from utils import get_loader, winnow, load_model
 
 
 class Manager:
@@ -24,16 +24,16 @@ class Manager:
         self.image_size = image_size
         self.nc = nc
 
-        if not os.path.isdir('models'):
-            os.mkdir('models')
-        if not os.path.isdir('Result'):
-            os.mkdir('Result')
+        if not os.path.isdir('Data_and_Results/LSGAN_model'):
+            os.mkdir('Data_and_Results/LSGAN_model')
+        if not os.path.isdir('Data_and_Results/LSGAN_Result'):
+            os.mkdir('Data_and_Results/LSGAN_Result')
 
     def train(self):
         noise = Variable(FloatTensor(self.batch_size, 100, 1, 1)).cuda()
         real = Variable(FloatTensor(self.batch_size, self.nc, self.image_size, self.image_size)).cuda()
         label = Variable(FloatTensor(self.batch_size)).cuda()
-        nepoch = 1000
+        nepoch = 100000
         real_label, fake_label = 1, 0
 
         def loss_func(output, label):
@@ -85,10 +85,10 @@ class Manager:
                 sys.stdout.flush()
 
                 """Visualize"""
-                if i % 10 == 0:
+                if i % 100 == 0:
                     f_noise = Variable(FloatTensor(self.batch_size, 100, 1, 1).normal_(0, 1)).cuda()
                     f_fake = self.g(f_noise)
-                    dir = 'Result2/{0}_{1}.jpg'.format(epoch, i)
+                    dir = 'Data_and_Results/LSGAN_Result/{0}_{1}.jpg'.format(epoch, i)
                     print(' | Saving result')
                     uts.save_image(
                         tensor=f_fake.data,
@@ -97,14 +97,24 @@ class Manager:
                         normalize=True
                     )
             # save the model
-            torch.save(self.g, 'models2/net_g.pt')
-            torch.save(self.d, 'models2/net_d.pt')
+            torch.save(self.g, 'Data_and_Results/LSGAN_model/net_g.pt')
+            torch.save(self.d, 'Data_and_Results/LSGAN_model/net_d.pt')
+
+            if epoch % 50 == 0:
+                torch.save(self.g, 'Data_and_Results/LSGAN_model/net_g_{}.pt'.format(epoch))
+                torch.save(self.d, 'Data_and_Results/LSGAN_model/net_d_{}.pt'.format(epoch))
+
+    def train_with_model(self):
+        self.g = load_model('LSGAN', 'g')
+        self.d = load_model('LSGAN', 'd')
+        self.train()
 
 
 if __name__ == '__main__':
-    path = 'sifted_img'
+    path = 'Data_and_Results/data/face'
     image_size = 128
-    batch_size = 100
+    batch_size = 128
     nc = 3
-    lsgan = Manager(path, image_size, batch_size, nc)
-    lsgan.train()
+    # winnow(path, image_size)
+    lsgan = Manager('Data_and_Results/winnowed', image_size, batch_size, nc)
+    lsgan.train_with_model()
